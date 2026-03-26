@@ -31,15 +31,21 @@ document.getElementById("enter-site-btn")?.addEventListener("click", () => {
   document.getElementById("dashboard-layout").style.display = "flex";
 });
 
-// Dropdown toggle
-document.getElementById("about-toggle")?.addEventListener("click", () => {
-  document.getElementById("about-submenu").classList.toggle("show");
-});
-
-// Page switching
-document.querySelectorAll(".nav-link").forEach(link => {
-  link.addEventListener("click", () => {
-    document.querySelectorAll(".page-section").forEach(p => p.classList.remove("active"));
-    document.getElementById(link.dataset.page).classList.add("active");
+// Switch page function
+function switchPage(pageId) {
+  document.querySelectorAll(".page-section").forEach(section => {
+    section.classList.remove("active");
   });
-});
+  document.getElementById(pageId).classList.add("active");
+}
+
+// Toggle about menu
+function toggleAboutMenu() {
+  document.getElementById("about-dropdown").classList.toggle("show");
+  const arrow = document.getElementById("about-arrow");
+  if (arrow) {
+    arrow.style.transform = document.getElementById("about-dropdown").classList.contains("show") 
+      ? "rotate(180deg)" 
+      : "rotate(0deg)";
+  }
+}
