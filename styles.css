@@ -362,11 +362,8 @@ body {
     font-weight: bold;
     color: #8e44ad;
 }
-/* =========================
-   📱 MOBILE RESPONSIVENESS
-   ========================= */
 
-/* Tablets & below */
+
 @media (max-width: 1024px) {
     .main-content {
         padding: 30px;
