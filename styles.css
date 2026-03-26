@@ -428,7 +428,7 @@ body {
 
     /* Dashboard layout */
     #dashboard-layout {
-        flex-direction: column;
+        flex-direction: row;
     }
 
     /* Sidebar becomes top bar */
