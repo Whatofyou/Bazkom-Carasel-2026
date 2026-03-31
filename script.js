@@ -1,84 +1,95 @@
+// --- Cache DOM Elements ---
+const els = {
+  days: document.getElementById("days"),
+  hours: document.getElementById("hours"),
+  minutes: document.getElementById("minutes"),
+  seconds: document.getElementById("seconds"),
+  countdownView: document.getElementById("countdown-view"),
+  eventView: document.getElementById("event-view"),
+  enterBtn: document.getElementById("enter-site-btn"),
+  dashboard: document.getElementById("dashboard-layout"),
+  sidebar: document.getElementById("sidebar"),
+  mainContent: document.querySelector('.main-content'),
+  openBtn: document.getElementById('sidebar-open-btn'),
+  closeBtn: document.querySelector("#btn"),
+  pages: document.querySelectorAll(".page-section")
+};
 
-// Countdown logic (unchanged)
-const eventDate = new Date().getTime() + 5000;
+// --- Countdown Logic ---
+// Set exact date and time
+const targetDate = new Date("January 11, 2026 12:03:00");
+
+// Convert target date into milliseconds for timer
+const eventDate = targetDate.getTime();
+
 const countdownInterval = setInterval(() => {
-  const now = new Date().getTime();
-  const distance = eventDate - now;
-  if (distance < 0) {
+  const distance = eventDate - Date.now();
+
+  if (distance <= 0) {
     clearInterval(countdownInterval);
-    document.getElementById("days").textContent = "00";
-    document.getElementById("hours").textContent = "00";
-    document.getElementById("minutes").textContent = "00";
-    document.getElementById("seconds").textContent = "00";
-    document.getElementById("countdown-view").style.display = "none";
-    const eventView = document.getElementById("event-view");
-    eventView.style.display = "flex";
-    setTimeout(() => {
-      eventView.style.opacity = "1";
-      eventView.style.transform = "translateY(0)";
-    }, 10);
-  } else {
-    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    document.getElementById("days").textContent = String(days).padStart(2, "0");
-    document.getElementById("hours").textContent = String(hours).padStart(2, "0");
-    document.getElementById("minutes").textContent = String(minutes).padStart(2, "0");
-    document.getElementById("seconds").textContent = String(seconds).padStart(2, "0");
+
+    ['days', 'hours', 'minutes', 'seconds'].forEach(id => els[id].textContent = "00");
+    els.countdownView.style.display = "none";
+    els.eventView.style.display = "flex";
+
+    // requestAnimationFrame ensures the display flex applies before the transition starts
+    requestAnimationFrame(() => {
+      els.eventView.style.opacity = "1";
+      els.eventView.style.transform = "translateY(0)";
+    });
+    return;
   }
+
+  els.days.textContent = String(Math.floor(distance / 86400000)).padStart(2, "0");
+  els.hours.textContent = String(Math.floor((distance % 86400000) / 3600000)).padStart(2, "0");
+  els.minutes.textContent = String(Math.floor((distance % 3600000) / 60000)).padStart(2, "0");
+  els.seconds.textContent = String(Math.floor((distance % 60000) / 1000)).padStart(2, "0");
 }, 1000);
 
-// View Event button
-document.getElementById("enter-site-btn")?.addEventListener("click", () => {
-  document.getElementById("event-view").style.display = "none";
-  document.getElementById("dashboard-layout").style.display = "flex";
+
+// --- View Event Button ---
+els.enterBtn?.addEventListener("click", () => {
+  els.eventView.style.display = "none";
+  els.dashboard.style.display = "flex";
 });
 
-// Sidebar open/close logic
-const btn = document.querySelector("#btn");
-const sidebar = document.getElementById("sidebar");
-const mainContent = document.querySelector('.main-content');
-const openBtn = document.getElementById('sidebar-open-btn');
 
-function showSidebarOpenBtn(show) {
-  if (openBtn) openBtn.style.display = show ? 'block' : 'none';
-}
+// --- Sidebar Logic ---
+const toggleSidebarBtn = (show) => {
+  if (els.openBtn) els.openBtn.style.display = show ? 'block' : 'none';
+};
 
-// Show open button when sidebar is closed
-showSidebarOpenBtn(true);
+const closeSidebar = () => {
+  els.sidebar?.classList.remove("active");
+  toggleSidebarBtn(true);
+  if (els.mainContent) els.mainContent.style.filter = "none";
+};
 
-if (btn && sidebar) {
-  btn.onclick = function(e) {
-    sidebar.classList.remove("active");
-    showSidebarOpenBtn(true);
-    if(mainContent) mainContent.style.filter = "none";
-    e.stopPropagation();
-  };
-}
-if (openBtn && sidebar) {
-  openBtn.onclick = function(e) {
-    sidebar.classList.add("active");
-    showSidebarOpenBtn(false);
-    if(mainContent) mainContent.style.filter = "blur(2px)";
-    e.stopPropagation();
-  };
-}
-// Hide sidebar when clicking outside
-document.addEventListener('click', function(e) {
-  if (sidebar && sidebar.classList.contains('active')) {
-    if (!sidebar.contains(e.target) && e.target !== openBtn) {
-      sidebar.classList.remove('active');
-      showSidebarOpenBtn(true);
-      if(mainContent) mainContent.style.filter = "none";
-    }
+toggleSidebarBtn(true);
+
+els.closeBtn?.addEventListener('click', (e) => {
+  closeSidebar();
+  e.stopPropagation();
+});
+
+els.openBtn?.addEventListener('click', (e) => {
+  els.sidebar?.classList.add("active");
+  toggleSidebarBtn(false);
+  if (els.mainContent) els.mainContent.style.filter = "blur(2px)";
+  e.stopPropagation();
+});
+
+// Close sidebar on outside click
+document.addEventListener('click', (e) => {
+  if (els.sidebar?.classList.contains('active') && !els.sidebar.contains(e.target) && e.target !== els.openBtn) {
+    closeSidebar();
   }
 });
 
-// Page switching logic (keep for dashboard)
-function switchPage(pageId) {
-    document.querySelectorAll(".page-section").forEach(section => {
-        section.classList.remove("active");
-    });
-    document.getElementById(pageId).classList.add("active");
-}
+
+// --- Page Switching Logic ---
+// We attach this directly to the window so the inline onclick="" in HTML can still find it
+window.switchPage = (pageId) => {
+  els.pages.forEach(section => section.classList.remove("active"));
+  document.getElementById(pageId)?.classList.add("active");
+};
